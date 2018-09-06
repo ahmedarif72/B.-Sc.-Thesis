@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Aug 13 18:22:27 2018
+
+@author: Sheikh Arif Ahmed
+"""
+
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.metrics import confusion_matrix
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn import tree
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
+from sklearn.cross_validation import cross_val_score, cross_val_predict
+
+
+dataset = pd.read_csv('395 data scaledR.csv')
+X = dataset.iloc[:, 1:-2].values
+y = dataset.iloc[:, 26].values
+
+#print (dataset.describe())
+
+from sklearn.cross_validation import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 1/2.0, random_state = 0)
+
+
+
+#-------------------------List Of Classifiers-----------------------------------
+CLASSIFIERS= {
+    "KNN": KNeighborsClassifier(n_neighbors =5, metric= 'minkowski', p=2),
+    "Decision Tree": tree.DecisionTreeClassifier(criterion='gini'),
+    "Naive Bayes": GaussianNB(), 
+    "Random Forest": RandomForestClassifier(),
+    "SVMlinear": SVC(kernel='linear'),
+    "SVMrbf":SVC(kernel='rbf')
+}
+y_pred = dict() #Dictionary for saving the predicted value of each algorithm
+cm=dict() #Dictionary for saving confusion matrix
+ClassificationReport=dict() #Dictionary for saving classification report
+#--------Loop for running and reporting all classifier from the list-----------------
+for name, classifier in CLASSIFIERS.items():     
+    classifier.fit(X_train, y_train)                    # fit() with instantiated object
+    y_pred[name] =cross_val_predict(classifier, X, y, cv=10)
+    cm[name]=confusion_matrix(y,y_pred[name])
+    ClassificationReport[name] =classification_report(y, y_pred[name], target_names=["OK", "Not OK" ])
